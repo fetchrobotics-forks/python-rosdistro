@@ -33,6 +33,7 @@
 
 import socket
 import time
+import os
 try:
     from urllib.request import urlopen
     from urllib.error import HTTPError
@@ -45,7 +46,14 @@ except ImportError:
 
 def load_url(url, retry=2, retry_period=1, timeout=10, skip_decode=False):
     try:
-        fh = urlopen(url, timeout=timeout)
+        headers = {}
+        if 'ROSDISTRO_OAUTH' in os.environ:
+            import base64
+            from urllib2 import Request
+            credentials = os.environ['ROSDISTRO_OAUTH'] + ':x-oauth-basic'
+            credentials = credentials.format(**vars()).encode()
+            headers = {'Authorization': b'Basic ' + base64.b64encode(credentials)}
+        fh = urlopen(Request(url, headers=headers), timeout=timeout)
     except HTTPError as e:
         if e.code in [500, 502, 503] and retry:
             time.sleep(retry_period)
