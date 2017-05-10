@@ -31,6 +31,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import base64
 import socket
 import time
 import os
@@ -42,14 +43,13 @@ except ImportError:
     from urllib2 import urlopen
     from urllib2 import HTTPError
     from urllib2 import URLError
+    from urllib2 import Request
 
 
 def load_url(url, retry=2, retry_period=1, timeout=10, skip_decode=False):
     try:
         headers = {}
         if 'ROSDISTRO_OAUTH' in os.environ:
-            import base64
-            from urllib2 import Request
             credentials = os.environ['ROSDISTRO_OAUTH'] + ':x-oauth-basic'
             credentials = credentials.format(**vars()).encode()
             headers = {'Authorization': b'Basic ' + base64.b64encode(credentials)}
